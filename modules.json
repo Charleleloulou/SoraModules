@@ -1,0 +1,21 @@
+{
+    "sourceName": "Movix (ENG/FRE)",
+    "iconUrl": "https://raw.githubusercontent.com/YourGitHubUser/Movix-Sora/main/logo.png",
+    "author": {
+        "name": "Charles",
+        "icon": "https://raw.githubusercontent.com/YourGitHubUser/Movix-Sora/main/charles.png",
+        "url": "https://github.com/YourGitHubUser/Movix-Sora"
+    },
+    "version": "1.0.0",
+    "language": "English/French",
+    "streamType": "HLS",
+    "quality": "1080p",
+    "type": "movies",
+    "downloadSupport": true,
+    "baseUrl": "https://movix.site/",
+    "searchBaseUrl": "https://movix.site/api/search?query=%s",
+    "scriptUrl": "https://raw.githubusercontent.com/YourGitHubUser/Movix-Sora/main/script.js",
+    "asyncJS": true,
+    "streamAsyncJS": true,
+    "softsub": true
+}

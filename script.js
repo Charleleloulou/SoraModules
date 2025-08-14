@@ -1,41 +1,73 @@
-async function fetchPageHtml(url) {
-  const response = await fetch(url)
-  return await response.text()
+async function extractEpisodes(showUrl) {
+    try {
+        const response = await fetch(showUrl);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        
+        const episodeElements = doc.querySelectorAll("a.episode-link");
+        const episodes = [];
+
+        episodeElements.forEach((el, index) => {
+            const title = el.textContent.trim() || `Episode ${index + 1}`;
+            const url = el.href.startsWith("http") ? el.href : `https://movix.site${el.href}`;
+            episodes.push({
+                title: title,
+                url: url,
+                season: 1,
+                episode: index + 1
+            });
+        });
+
+        return episodes;
+    } catch (err) {
+        console.error("Failed to extract episodes:", err);
+        return [];
+    }
 }
 
-function extractMasterLinks(html) {
-  const regex = /https:\/\/dl30\.darkibox\.com\/hls2\/[^\s'"]+master\.m3u8/g
-  const matches = html.match(regex)
-  return matches || []
+async function extractStreamUrl(episodeUrl) {
+    try {
+        const response = await fetch(episodeUrl);
+        const html = await response.text();
+        const match = html.match(/https?:\/\/dl30\.darkibox\.com\/hls2\/[^\s'"]+/);
+        return match ? match[0] : null;
+    } catch (err) {
+        console.error("Failed to extract stream URL:", err);
+        return null;
+    }
 }
 
-function getEpisodes(html) {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(html, 'text/html')
-  const buttons = Array.from(doc.querySelectorAll('button'))
-  const episodeButtons = buttons.filter(btn => btn.textContent.includes('Commencer L\'épisode'))
-  return episodeButtons.map((btn, index) => ({
-    title: `Épisode ${index + 1}`,
-    index: index + 1
-  }))
+async function searchResults(keyword) {
+    try {
+        const searchUrl = `https://movix.site/search=${encodeURIComponent(keyword)}`;
+        const response = await fetch(searchUrl);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        
+        const results = [];
+        const items = doc.querySelectorAll(".search-result-item");
+
+        items.forEach(item => {
+            const titleEl = item.querySelector(".title");
+            const linkEl = item.querySelector("a");
+            const posterEl = item.querySelector("img");
+
+            if (titleEl && linkEl) {
+                results.push({
+                    title: titleEl.textContent.trim(),
+                    url: linkEl.href.startsWith("http") ? linkEl.href : `https://movix.site${linkEl.href}`,
+                    type: "tv",
+                    poster: posterEl ? posterEl.src : "",
+                    description: item.querySelector(".description")?.textContent.trim() || ""
+                });
+            }
+        });
+
+        return results;
+    } catch (err) {
+        console.error("Search failed:", err);
+        return [];
+    }
 }
-
-async function main(pageUrl) {
-  const html = await fetchPageHtml(pageUrl)
-  const masterLinks = extractMasterLinks(html)
-  
-  if (masterLinks.length === 0) return null
-
-  const episodes = getEpisodes(html)
-  if (episodes.length > 0) {
-    return episodes.map((ep, i) => ({
-      title: ep.title,
-      type: 'hls',
-      url: masterLinks[i] || masterLinks[0]
-    }))
-  }
-
-  return { type: 'hls', url: masterLinks[0] }
-}
-
-export default { main }

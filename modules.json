@@ -1,0 +1,12 @@
+{
+  "name": "Movix",
+  "id": "movix",
+  "version": "1.0.0",
+  "description": "Fetch movies and series episodes from Movix",
+  "author": "Charles",
+  "type": "source",
+  "main": "script.js",
+  "languages": ["fr", "en"],
+  "supportedUrls": ["https://movix.site/*"],
+  "icon": "https://movix.site/favicon.ico"
+}
